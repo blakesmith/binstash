@@ -1,2 +1,4 @@
+import Binstash.Configuration
+
 main :: IO ()
-main = putStrLn "Hello"
+main = gatherCredentials

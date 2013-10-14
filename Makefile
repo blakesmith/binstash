@@ -1,4 +1,4 @@
-all: configure build
+all: build
 
 clean:
 	cabal clean
