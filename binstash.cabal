@@ -1,0 +1,17 @@
+name: binstash
+version: 0.0.1
+homepage: http://binstash.com
+synopsis: BinStash package management command line utility
+description: Manage your BinStash packages
+license: BSD3
+author: Blake Smith
+build-type: Simple
+cabal-version: >= 1.2
+
+library
+  build-depends: aeson, base, bytestring, http-conduit
+  ghc-options: -Wall
+
+executable binstash
+  main-is: Main.hs
+  ghc-options: -Wall
