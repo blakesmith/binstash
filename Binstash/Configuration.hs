@@ -25,8 +25,7 @@ homeDir = do
 
 readCredentials :: IO Credentials
 readCredentials = do
-                path <- homeDir
-                body <- B.readFile path
+                body <- homeDir >>= B.readFile
                 return $ (fromJust . decode) body
 
 writeCredentials :: Credentials -> IO ()
