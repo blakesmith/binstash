@@ -10,6 +10,7 @@ import Data.Aeson (ToJSON, FromJSON, decode)
 import Data.Aeson.Encode (encode)
 import Data.Maybe (fromJust)
 import System.FilePath
+import Control.Monad
 
 data Credentials = Credentials { _token  :: String
                                , _secret :: String
@@ -19,9 +20,7 @@ instance ToJSON Credentials
 instance FromJSON Credentials
 
 homeDir :: IO FilePath
-homeDir = do
-        home <- getHomeDirectory
-        return $ combine home ".binstash"
+homeDir = liftM (flip combine ".binstash") getHomeDirectory
 
 readCredentials :: IO Credentials
 readCredentials = do
