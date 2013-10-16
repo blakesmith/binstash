@@ -1,7 +1,7 @@
 module Binstash.Cmd where
 
 import Control.Monad.Reader
-import Binstash.Args (Args)
+import Binstash.Args
 import Binstash.Configuration (Credentials)
 
 data Client = Client { _args :: Args
@@ -10,9 +10,12 @@ data Client = Client { _args :: Args
 
 type ClientEnv = ReaderT Client IO
 
+runCommand :: String -> ClientEnv (Either String String)
+runCommand "list" = return $ Right "Success!"
+runCommand _ = return $ Left "Unknown command"
 
 runClient :: ClientEnv (Either String String)
-runClient = return $ Right "Success!"
+runClient = liftM command (asks _args) >>= runCommand
 
 showResult :: (Either String String) -> String
 showResult (Left err) = "Error: " ++ err
