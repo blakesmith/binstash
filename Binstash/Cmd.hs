@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Binstash.Cmd where
 
-import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy.Char8 as LB
 import Control.Monad.Reader
-import Network.HTTP.Conduit
 import Binstash.Args
 import Binstash.Configuration
+import Binstash.Http
 
 data Client = Client { _args :: Args
                      , _creds :: Credentials
@@ -17,13 +16,8 @@ type ClientEnv = ReaderT Client IO
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
            creds <- asks _creds
-           request <- liftM (applyBasicAuth (user creds) (pass creds)) $ parseUrl "http://api.binstash.com/repositories"
-           response <- withManager $ httpLbs request { method = "POST" }
-           liftIO $ LB.putStrLn (responseBody response)
-           return $ Right ((show . responseStatus) response)
-           where
-                user c = B.pack $ _token c
-                pass c = B.pack $ _secret c
+           body <- liftIO $ httpLBS creds "http://api.binstash.com/repositories" "POST"
+           return $ Right (LB.unpack body)
 
 runCommand _ = return $ Left "Unknown command"
 
