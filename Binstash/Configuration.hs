@@ -4,7 +4,7 @@ module Binstash.Configuration where
 
 import qualified Data.ByteString.Lazy as B
 import GHC.Generics (Generic)
-import System.Directory (getHomeDirectory)
+import System.Directory (getHomeDirectory, doesFileExist)
 import System.IO (withFile, IOMode(WriteMode))
 import Data.Aeson (ToJSON, FromJSON, decode)
 import Data.Aeson.Encode (encode)
@@ -27,13 +27,14 @@ readCredentials = do
                 body <- homeDir >>= B.readFile
                 return $ (fromJust . decode) body
 
-writeCredentials :: Credentials -> IO ()
+writeCredentials :: Credentials -> IO Credentials
 writeCredentials creds = do
                  path <- homeDir
                  withFile path WriteMode $ \handle -> do
                  B.hPut handle $ encode creds
+                 return creds
 
-gatherCredentials :: IO ()
+gatherCredentials :: IO Credentials
 gatherCredentials = do
                   putStrLn "Enter your BinStash API Token: "
                   token <- getLine
@@ -41,3 +42,7 @@ gatherCredentials = do
                   secret <- getLine
                   writeCredentials $ Credentials token secret
 
+getCredentials :: IO Credentials
+getCredentials = homeDir >>= doesFileExist >>= creds
+               where creds True = readCredentials
+                     creds False = gatherCredentials
