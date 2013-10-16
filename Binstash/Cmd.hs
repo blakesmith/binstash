@@ -2,7 +2,7 @@
 module Binstash.Cmd where
 
 import qualified Data.ByteString.Char8 as B
-import Data.Conduit           (($$+-))
+import qualified Data.ByteString.Lazy.Char8 as LB
 import Control.Monad.Reader
 import Network.HTTP.Conduit
 import Binstash.Args
@@ -18,10 +18,9 @@ runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
            creds <- asks _creds
            request <- liftM (applyBasicAuth (user creds) (pass creds)) $ parseUrl "http://api.binstash.com/repositories"
-           withManager $ \manager -> do
-               response <- http request { method = "POST" } manager
-               responseBody response $$+- return ()
-               return $ Right ((show . responseStatus) response)
+           response <- withManager $ httpLbs request { method = "POST" }
+           liftIO $ LB.putStrLn (responseBody response)
+           return $ Right ((show . responseStatus) response)
            where
                 user c = B.pack $ _token c
                 pass c = B.pack $ _secret c
