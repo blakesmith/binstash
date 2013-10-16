@@ -7,4 +7,4 @@ main = do
      args <- getArgs
      creds <- getCredentials
      result <- run $ Client args creds
-     putStrLn . show $ result
+     putStrLn result

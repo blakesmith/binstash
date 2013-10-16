@@ -11,8 +11,12 @@ data Client = Client { _args :: Args
 type ClientEnv = ReaderT Client IO
 
 
-runClient :: ClientEnv ()
-runClient = return ()
+runClient :: ClientEnv (Either String String)
+runClient = return $ Right "Success!"
 
-run :: Client -> IO ()
-run client = runReaderT runClient client
+showResult :: (Either String String) -> String
+showResult (Left err) = "Error: " ++ err
+showResult (Right msg) = msg
+
+run :: Client -> IO String
+run client = liftM showResult (runReaderT runClient client)
