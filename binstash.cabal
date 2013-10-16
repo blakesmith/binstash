@@ -9,8 +9,9 @@ build-type: Simple
 cabal-version: >= 1.2
 
 library
-  build-depends: aeson, base, bytestring, directory, filepath, http-conduit, ghc-prim
+  build-depends: aeson, base, bytestring, cmdargs, directory, filepath, http-conduit, ghc-prim
   exposed-modules: Binstash.Configuration
+                   Binstash.Args
   ghc-options: -Wall
 
 executable binstash
