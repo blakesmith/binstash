@@ -19,20 +19,17 @@ data Credentials = Credentials { _token  :: String
 instance ToJSON Credentials
 instance FromJSON Credentials
 
-homeDir :: IO FilePath
-homeDir = liftM (flip combine ".binstash") getHomeDirectory
+configLocation :: IO FilePath
+configLocation = liftM (flip combine ".binstash") getHomeDirectory
 
 readCredentials :: IO Credentials
-readCredentials = do
-                body <- homeDir >>= B.readFile
-                return $ (fromJust . decode) body
+readCredentials = liftM (fromJust . decode) $ configLocation >>= B.readFile
 
-writeCredentials :: Credentials -> IO Credentials
+writeCredentials :: Credentials -> IO ()
 writeCredentials creds = do
-                 path <- homeDir
+                 path <- configLocation
                  withFile path WriteMode $ \handle -> do
                  B.hPut handle $ encode creds
-                 return creds
 
 gatherCredentials :: IO Credentials
 gatherCredentials = do
@@ -41,8 +38,9 @@ gatherCredentials = do
                   putStrLn "Enter your BinStash API Secret: "
                   secret <- getLine
                   writeCredentials $ Credentials token secret
+                  return $ Credentials token secret
 
 getCredentials :: IO Credentials
-getCredentials = homeDir >>= doesFileExist >>= creds
+getCredentials = configLocation >>= doesFileExist >>= creds
                where creds True = readCredentials
                      creds False = gatherCredentials
