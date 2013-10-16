@@ -10,7 +10,7 @@ version = "0.0.1"
 binArgs :: Args 
 binArgs = Args { command = def &= args &= typ "COMMAND"}
         &= program "binstash"
-        &= summary ("BinStash command line client (" ++ version ++ ")")
+        &= summary ("BinStash command line client v" ++ version)
 
 getArgs :: IO Args
 getArgs = cmdArgs binArgs
