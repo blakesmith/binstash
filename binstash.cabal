@@ -10,8 +10,9 @@ cabal-version: >= 1.2
 
 library
   build-depends: aeson, base, bytestring, cmdargs, directory, filepath, http-conduit, mtl, ghc-prim
-  exposed-modules: Binstash.Configuration
-                   Binstash.Args
+  exposed-modules: Binstash.Args
+                   Binstash.Cmd
+                   Binstash.Configuration
   ghc-options: -Wall
 
 executable binstash
