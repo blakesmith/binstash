@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Binstash.Cmd where
 
-import qualified Data.ByteString.Lazy.Char8 as LB
+import Data.Aeson (decode)
+import Data.List (intersperse)
 import Control.Monad.Reader
 import Binstash.Args
 import Binstash.Configuration
 import Binstash.Http
+import Binstash.Types
 
 data Client = Client { _args :: Args
                      , _creds :: Credentials
@@ -13,11 +15,19 @@ data Client = Client { _args :: Args
 
 type ClientEnv = ReaderT Client IO
 
+listRepositories :: Maybe RepositoriesResponse -> String
+listRepositories resp = case resp of
+                  Just r -> joinA "\n" (map line $ repositories r)
+                  Nothing -> "No repositories"
+    where line r = (directory r ++ "/" ++ name r)
+          joinA :: [a] -> [[a]] -> [a]
+          joinA delim l = concat (intersperse delim l)
+
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
            creds <- asks _creds
            body <- liftIO $ httpLBS creds "http://api.binstash.com/repositories" "POST"
-           return $ Right (LB.unpack body)
+           return $ Right (listRepositories (decode body :: Maybe RepositoriesResponse))
 
 runCommand _ = return $ Left "Unknown command"
 
