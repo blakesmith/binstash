@@ -17,10 +17,11 @@ type ClientEnv = ReaderT Client IO
 
 listRepositories :: Maybe RepositoriesResponse -> String
 listRepositories resp = case resp of
-                  Just r -> joinA "\n" (map line $ repositories r)
+                  Just res -> joinA "\n" $ repos res
                   Nothing -> "No repositories"
-    where line r = (directory r ++ "/" ++ name r)
-          joinA :: [a] -> [[a]] -> [a]
+    where repos r = map line $ zip [1..] (repositories r)
+          line :: (Int, Repository) -> String
+          line t = show (fst t) ++ ". " ++ (directory (snd t) ++ "/" ++ name (snd t))
           joinA delim l = concat (intersperse delim l)
 
 runCommand :: String -> ClientEnv (Either String String)
