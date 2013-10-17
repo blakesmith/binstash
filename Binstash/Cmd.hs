@@ -27,7 +27,7 @@ listRepositories resp = case resp of
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
            creds <- asks _creds
-           body <- liftIO $ httpLBS creds "http://api.binstash.com/repositories" "POST"
+           body <- liftIO $ httpLBS creds "http://api.binstash.com/repositories" "GET"
            return $ Right (listRepositories (decode body :: Maybe RepositoriesResponse))
 
 runCommand _ = return $ Left "Unknown command"
