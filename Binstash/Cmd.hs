@@ -16,10 +16,10 @@ data Client = Client { _args :: Args
 type ClientEnv = ReaderT Client IO
 
 listRepositories :: Maybe RepositoriesResponse -> String
-listRepositories resp = case resp of
+listRepositories resp = case repositories `fmap` resp of
                   Just res -> joinA "\n" $ repos res
                   Nothing -> "No repositories"
-    where repos r = map line $ zip [1..] (repositories r)
+    where repos r = map line $ zip [1..] r
           line :: (Int, Repository) -> String
           line t = show (fst t) ++ ". " ++ (directory (snd t) ++ "/" ++ name (snd t))
           joinA delim l = concat (intersperse delim l)
