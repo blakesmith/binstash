@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Binstash.Cmd where
 
+import qualified Data.ByteString.Lazy.Char8 as LB
 import Data.Aeson (decode)
 import Data.List (intersperse)
 import Control.Monad.Reader
@@ -29,6 +30,12 @@ runCommand "list" = do
            creds <- asks _creds
            body <- liftIO $ httpLBS creds "http://api.binstash.com/repositories" "GET"
            return $ Right (listRepositories (decode body :: Maybe RepositoriesResponse))
+
+runCommand "add" = do
+           creds <- asks _creds
+           f <- liftM filename (asks _args)
+           body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" "POST" [("directory", "blakesmith"), ("name", "binstash")] f
+           return $ (Right . LB.unpack) body
 
 runCommand _ = return $ Left "Unknown command"
 

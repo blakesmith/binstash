@@ -16,3 +16,6 @@ httpLBS creds url meth = do
            where
                 user c = B.pack $ _token c
                 pass c = B.pack $ _secret c
+
+httpMultiForm :: Credentials -> String -> Method -> [(String, String)] -> FilePath -> IO LB.ByteString
+httpMultiForm creds url meth query filepath = return $ LB.pack filepath
