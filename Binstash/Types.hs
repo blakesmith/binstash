@@ -44,7 +44,7 @@ instance Show Package where
     show p = concat (intersperse "\n" [ "Name: " ++ (packageName p)
                                       , "Version: " ++ (version p)
                                       , "Description: " ++ (description p)
-                                      , "Section: " ++ (packageType p)
+                                      , "Section: " ++ (section p)
                                       , "Type: " ++ (packageType p)
                                       , "Architecture: " ++ (architecture p)
                                       , "Active: " ++ show (active p)

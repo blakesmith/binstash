@@ -33,7 +33,7 @@ showPackage resp = case resp of
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
            creds <- asks _creds
-           body <- liftIO $ httpLBS creds "http://api.binstash.com/repositories" "GET"
+           body <- liftIO $ httpLBS creds "/repositories" "GET"
            return $ Right (listRepositories (decode body :: Maybe RepositoriesResponse))
 
 runCommand "add" = do
@@ -41,7 +41,7 @@ runCommand "add" = do
            f <- liftM filename (asks _args)
            dir <- liftM directory_ (asks _args)
            n <- liftM name_ (asks _args)
-           body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" [("directory", B.pack dir), ("name", B.pack n)] f
+           body <- liftIO $ httpMultiForm creds "/packages" [("directory", B.pack dir), ("name", B.pack n)] f
            return $ Right (showPackage (decode body :: Maybe Package))
 
 runCommand _ = return $ Left "Unknown command"
