@@ -2,6 +2,7 @@
 module Binstash.Cmd where
 
 import qualified Data.ByteString.Lazy.Char8 as LB
+import qualified Data.ByteString.Char8 as B
 import Data.Aeson (decode)
 import Data.List (intersperse)
 import Control.Monad.Reader
@@ -36,7 +37,7 @@ runCommand "add" = do
            f <- liftM filename (asks _args)
            dir <- liftM directory_ (asks _args)
            n <- liftM name_ (asks _args)
-           body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" "POST" [("directory", dir), ("name", n)] f
+           body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" [("directory", B.pack dir), ("name", B.pack n)] f
            return $ (Right . LB.unpack) body
 
 runCommand _ = return $ Left "Unknown command"
