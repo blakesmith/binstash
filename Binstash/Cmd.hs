@@ -34,7 +34,9 @@ runCommand "list" = do
 runCommand "add" = do
            creds <- asks _creds
            f <- liftM filename (asks _args)
-           body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" "POST" [("directory", "blakesmith"), ("name", "binstash")] f
+           dir <- liftM directory_ (asks _args)
+           n <- liftM name_ (asks _args)
+           body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" "POST" [("directory", dir), ("name", n)] f
            return $ (Right . LB.unpack) body
 
 runCommand _ = return $ Left "Unknown command"
