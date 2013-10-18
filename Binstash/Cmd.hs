@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Binstash.Cmd where
 
-import qualified Data.ByteString.Lazy.Char8 as LB
 import qualified Data.ByteString.Char8 as B
 import Data.Aeson (decode)
 import Data.List (intersperse)
@@ -26,6 +25,11 @@ listRepositories resp = case repositories `fmap` resp of
           line t = show (fst t) ++ ". " ++ (directory (snd t) ++ "/" ++ name (snd t))
           joinA delim l = concat (intersperse delim l)
 
+showPackage :: Maybe Package -> String
+showPackage resp = case resp of
+            Just package -> "Package added!\n" ++ show package
+            Nothing -> "No package"
+
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
            creds <- asks _creds
@@ -38,7 +42,7 @@ runCommand "add" = do
            dir <- liftM directory_ (asks _args)
            n <- liftM name_ (asks _args)
            body <- liftIO $ httpMultiForm creds "http://api.binstash.com/packages" [("directory", B.pack dir), ("name", B.pack n)] f
-           return $ (Right . LB.unpack) body
+           return $ Right (showPackage (decode body :: Maybe Package))
 
 runCommand _ = return $ Left "Unknown command"
 
