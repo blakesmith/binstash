@@ -7,7 +7,7 @@ data Args = Args { command :: String
                  , directory_ :: String
                  , name_ :: String
                  , domain_ :: String
-                 , secure_ :: Bool
+                 , insecure_ :: Bool
                  } deriving (Data, Typeable, Show, Eq)
 
 version :: String
@@ -19,7 +19,7 @@ binArgs = Args { command = def &= args &= typ "COMMAND"
                , directory_ = def &= name "d" &= typ "DIRECTORY" &= help "Package directory. Usually your username"
                , name_ = def &= typ "NAME" &= help "Repository name, run 'binstash list' to see your repositories"
                , domain_ = "api.binstash.com" &= typ "DOMAIN" &= help "Binstash API domain. Defaults to 'api.binstash.com'"
-               , secure_ = False &= typ "SECURE" &= help "Should the client use https?"
+               , insecure_ = False &= typ "INSECURE" &= help "Should the client use http instead of https?"
                }
         &= program "binstash"
         &= summary ("BinStash command line client v" ++ version)

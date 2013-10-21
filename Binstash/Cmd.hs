@@ -31,13 +31,12 @@ showPackage (Just package) = "Package added!\n" ++ show package
 
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
-           httpArgs <- liftM3 HttpArgs (fmap secure_ $ asks _args) (fmap domain_ $ asks _args) (asks _creds)
-
+           httpArgs <- liftM3 HttpArgs (fmap (not . insecure_) $ asks _args) (fmap domain_ $ asks _args) (asks _creds)
            body <- liftIO $ httpLBS httpArgs "/repositories" "GET"
            return $ Right (listRepositories (decode body :: Maybe RepositoriesResponse))
 
 runCommand "add" = do
-           httpArgs <- liftM3 HttpArgs (fmap secure_ $ asks _args) (fmap domain_ $ asks _args) (asks _creds)
+           httpArgs <- liftM3 HttpArgs (fmap (not . insecure_) $ asks _args) (fmap domain_ $ asks _args) (asks _creds)
            f <- fmap filename $ asks _args
            dir <- fmap directory_ $ asks _args
            n <- fmap name_ $ asks _args
