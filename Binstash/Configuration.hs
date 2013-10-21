@@ -26,10 +26,9 @@ readCredentials :: IO Credentials
 readCredentials = liftM (fromJust . decode) $ configLocation >>= B.readFile
 
 writeCredentials :: Credentials -> IO ()
-writeCredentials creds = do
-                 path <- configLocation
-                 withFile path WriteMode $ \handle -> do
-                 B.hPut handle $ encode creds
+writeCredentials creds = configLocation >>= doWrite
+                 where doWrite p = withFile p WriteMode encodeAndPut
+                       encodeAndPut handle = B.hPut handle $ encode creds
 
 gatherCredentials :: IO Credentials
 gatherCredentials = do

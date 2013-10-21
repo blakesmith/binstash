@@ -26,9 +26,8 @@ listRepositories resp = case repositories `fmap` resp of
           joinA delim l = concat (intersperse delim l)
 
 showPackage :: Maybe Package -> String
-showPackage resp = case resp of
-            Just package -> "Package added!\n" ++ show package
-            Nothing -> "No package"
+showPackage Nothing = "No package\n"
+showPackage (Just package) = "Package added!\n" ++ show package
 
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
