@@ -4,7 +4,7 @@ module Binstash.Configuration where
 
 import qualified Data.ByteString.Lazy as B
 import GHC.Generics (Generic)
-import System.Directory (getHomeDirectory, doesFileExist)
+import System.Directory (getHomeDirectory, doesFileExist, createDirectoryIfMissing)
 import System.IO (withFile, IOMode(WriteMode))
 import Data.Aeson (ToJSON, FromJSON, decode)
 import Data.Aeson.Encode (encode)
@@ -19,15 +19,19 @@ data Credentials = Credentials { _token  :: String
 instance ToJSON Credentials
 instance FromJSON Credentials
 
-configLocation :: IO FilePath
-configLocation = liftM (flip combine ".binstash") getHomeDirectory
+configDir :: IO FilePath
+configDir = liftM (flip (</>) ".binstash") getHomeDirectory
+
+credsLocation :: IO FilePath
+credsLocation = liftM (flip (</>) "creds") configDir
 
 readCredentials :: IO Credentials
-readCredentials = liftM (fromJust . decode) $ configLocation >>= B.readFile
+readCredentials = liftM (fromJust . decode) $ credsLocation >>= B.readFile
 
 writeCredentials :: Credentials -> IO Credentials
-writeCredentials creds = configLocation >>= doWrite >> return creds
-                 where doWrite p = withFile p WriteMode encodeAndPut
+writeCredentials creds = configDir >>= dirCreate >> credsLocation >>= doWrite >> return creds
+                 where dirCreate = createDirectoryIfMissing True
+                       doWrite p = withFile p WriteMode encodeAndPut
                        encodeAndPut handle = B.hPut handle $ encode creds
 
 gatherCredentials :: IO Credentials
@@ -36,6 +40,6 @@ gatherCredentials = liftM2 Credentials getToken getSecret >>= writeCredentials
                         getSecret = putStrLn "Enter your BinStash API Secret: " >> getLine
 
 getCredentials :: IO Credentials
-getCredentials = configLocation >>= doesFileExist >>= creds
+getCredentials = credsLocation >>= doesFileExist >>= creds
                where creds True = readCredentials
                      creds False = gatherCredentials
