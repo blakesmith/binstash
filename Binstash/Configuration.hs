@@ -16,6 +16,11 @@ data Credentials = Credentials { _token  :: String
                                , _secret :: String
                                } deriving (Eq, Show, Generic)
 
+data HttpArgs = HttpArgs { _httpSecure :: Bool
+                         , _httpDomain :: String
+                         , _httpCredentials :: Credentials
+                         } deriving (Eq, Show)
+
 instance ToJSON Credentials
 instance FromJSON Credentials
 

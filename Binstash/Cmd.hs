@@ -31,16 +31,18 @@ showPackage (Just package) = "Package added!\n" ++ show package
 
 runCommand :: String -> ClientEnv (Either String String)
 runCommand "list" = do
-           creds <- asks _creds
-           body <- liftIO $ httpLBS creds "/repositories" "GET"
+           httpArgs <- liftM3 HttpArgs (_secure `fmap` asks _args) (_domain `fmap` asks _args) (asks _creds)
+
+           body <- liftIO $ httpLBS httpArgs "/repositories" "GET"
            return $ Right (listRepositories (decode body :: Maybe RepositoriesResponse))
 
 runCommand "add" = do
-           creds <- asks _creds
-           f <- liftM filename (asks _args)
-           dir <- liftM directory_ (asks _args)
-           n <- liftM name_ (asks _args)
-           body <- liftIO $ httpMultiForm creds "/packages" [("directory", B.pack dir), ("name", B.pack n)] f
+           httpArgs <- liftM3 HttpArgs (_secure `fmap` asks _args) (_domain `fmap` asks _args) (asks _creds)
+
+           f <- filename `fmap` asks _args
+           dir <- directory_ `fmap` asks _args
+           n <- name_ `fmap` asks _args
+           body <- liftIO $ httpMultiForm httpArgs "/packages" [("directory", B.pack dir), ("name", B.pack n)] f
            return $ Right (showPackage (decode body :: Maybe Package))
 
 runCommand _ = return $ Left "Unknown command"

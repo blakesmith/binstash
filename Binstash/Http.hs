@@ -11,30 +11,27 @@ import Network.HTTP.Types (Method)
 import Control.Monad
 import Binstash.Configuration
 
-proto :: String
-domain :: String
+urlFor :: HttpArgs -> String -> String
+urlFor httpA route = getProtocol (_httpSecure httpA) ++ _httpDomain httpA ++ route
+       where getProtocol :: Bool -> String
+             getProtocol True = "https://"
+             getProtocol False = "http://"
 
-proto = "http://"
-domain = "api.binstash.com"
-
-urlFor :: String -> String
-urlFor route = proto ++ domain ++ route
-
-basicRequest :: Failure HttpException m => Credentials -> String -> m (Request m1)
-basicRequest creds route = liftM (applyBasicAuth (user creds) (pass creds)) $ (parseUrl . urlFor) route
+basicRequest :: Failure HttpException m => HttpArgs -> String -> m (Request m1)
+basicRequest httpA route = liftM (applyBasicAuth user pass) $ (parseUrl . urlFor httpA) route
            where
-                user c = B.pack $ _token c
-                pass c = B.pack $ _secret c
+                user = B.pack $ _token (_httpCredentials httpA)
+                pass = B.pack $ _secret (_httpCredentials httpA)
 
-httpLBS :: Credentials -> String -> Method -> IO LB.ByteString
-httpLBS creds route meth = do
-           request <- basicRequest creds route
+httpLBS :: HttpArgs -> String -> Method -> IO LB.ByteString
+httpLBS httpA route meth = do
+           request <- basicRequest httpA route
            response <- withManager $ httpLbs request { method = meth }
            return (responseBody response)
 
-httpMultiForm :: Credentials -> String -> [(String, B.ByteString)] -> FilePath -> IO LB.ByteString
-httpMultiForm creds route query filepath = do
-           request <- basicRequest creds route
+httpMultiForm :: HttpArgs -> String -> [(String, B.ByteString)] -> FilePath -> IO LB.ByteString
+httpMultiForm httpA route query filepath = do
+           request <- basicRequest httpA route
            response <- withManager $ \m -> do flip httpLbs m =<< formRequest request
            return (responseBody response)
            where
